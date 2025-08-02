@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WhatsApp QR Bot</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      background: #1e1e1e;
+      color: #fff;
+      border: 1px solid #333;
+    }
+    #qr {
+      display: block;
+      margin: 20px auto;
+      max-width: 100%;
+    }
+    #progress {
+      white-space: pre-line;
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📱 WhatsApp QR Bot</h2>
+    <p>Scan the QR code below to connect:</p>
+    <img id="qr" src="" alt="QR Code will appear here"/>
+
+    <hr/>
+
+    <h3>📤 Send Group Messages</h3>
+    <input type="text" id="group" placeholder="Group Name" />
+    <textarea id="msg1" placeholder="Message 1"></textarea>
+    <textarea id="msg2" placeholder="Message 2"></textarea>
+    <textarea id="msg3" placeholder="Message 3"></textarea>
+    <button onclick="startBot()">Start Bot</button>
+
+    <h4>📊 Progress:</h4>
+    <div id="progress"></div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io('https://whatsapp-bot-2-1.onrender.com'); // Replace with your backend URL
+
+    socket.on('qr', (qrData) => {
+      const qrImg = document.getElementById('qr');
+      qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(qrData);
+    });
+
+    socket.on('connected', (msg) => {
+      document.getElementById('progress').innerText += "✅ " + msg + "\n";
+    });
+
+    socket.on('bot-progress', (msg) => {
+      document.getElementById('progress').innerText += msg + "\n";
+    });
+
+    function startBot() {
+      const groupName = document.getElementById('group').value;
+      const messages = [
+        document.getElementById('msg1').value,
+        document.getElementById('msg2').value,
+        document.getElementById('msg3').value
+      ];
+      socket.emit('start-bot', { groupName, messages });
+      document.getElementById('progress').innerText += "🚀 Bot Started...\n";
+    }
+  </script>
+</body>
+</html>
